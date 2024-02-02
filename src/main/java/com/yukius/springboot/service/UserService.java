@@ -27,6 +27,7 @@ public class UserService{
     /**Create
      * <br>
      * Регистрация пользователя в сети
+     * @throws org.springframework.dao.DataIntegrityViolationException if User Exists
      * */
     @Transactional
     public User saveUser(User user){
@@ -37,17 +38,18 @@ public class UserService{
     /**Create
      * <br>
      * Вход пользователя в систему
-     * @return 1.1v Now Returns user OR
+     * <br>
+     * BUG Method Optional{T} findOne(Example{T}) penetrates DataBase with empty @RequestBody User user={}
+     * <br>
      * @throws EntityNotFoundException if login/password is wrong
-     * @Bug Method Optional{T} findOne(Example{T}) penetrates DataBase with empty @RequestBody User user={}
-     * @Fix Created new Query in Repository
+
      */
     @Transactional
     public User logInto(User user) throws EntityNotFoundException{
-        return userRepository.findByParameters(user.getLogin(), user.getPassword())
-                .orElseThrow(()->{return new EntityNotFoundException(
-                        "Please enter a correct login and password");
-                });
+        return userRepository.findByParameters(user.getLogin(),
+                                               user.getPassword())
+                             .orElseThrow(EntityNotFoundException::new);
+
     }
 
 
@@ -57,6 +59,7 @@ public class UserService{
     @Transactional
     public List<String> getAllUsers(){
         List<String> logins = new ArrayList<>();
+
         userRepository.findAll().forEach(userObj -> {
             logins.add(userObj.getLogin());
         });
@@ -67,26 +70,23 @@ public class UserService{
     /**Update
      * <br>
      * Password
-     * @return User user if login/oldPassword matches
      * @throws EntityNotFoundException if no matches where found
-     * @Bug Same Bug occurred in method logInto(User user)
-     * @Fix Same Fix
      * */
     @Transactional
     public User update(UserBody userBody){
-        User user = userRepository.findByParameters(userBody.getLogin(), userBody.getOldPassword())
-                .orElseThrow(()->{return new EntityNotFoundException(
-                        "Please enter a correct login and previous password");
-                });
+        User user = userRepository.findByParameters(userBody.getLogin(),
+                                                    userBody.getOldPassword())
+                                  .orElseThrow(EntityNotFoundException::new);
+
         user.setPassword(Objects.requireNonNull(userBody.getNewPassword()));
         return user;
-
     }
 
 
     /**Delete
      * <br>
-     * Delete User from DB*/
+     * Delete User from DB
+     * @throws EntityNotFoundException if no matches where found*/
     @Transactional
     public String deleteUser(User user){
         userRepository.delete(logInto(user));

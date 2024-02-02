@@ -6,6 +6,7 @@ import com.yukius.springboot.entity.User;
 import com.yukius.springboot.entity.UserBody;
 import jakarta.persistence.EntityNotFoundException;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.MethodOrderer;
 
 import org.junit.jupiter.api.Test;
@@ -16,14 +17,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
 
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertFalse;
 
 
 @SpringBootTest
 @TestMethodOrder(MethodOrderer.MethodName.class)//Ordered Tests
 class SpringbootApplicationTests {
 	User trueUser = new User("Yukius101", "goodPassword");
-	User wrongUser = new User("Yukius101", "badPassword");
+	User wrongUser = new User("Yukius1", "badPassword");
 	UserBody forChangingPass = new UserBody("Yukius101", "goodPassword", "newGoodPassword");
 	User newTrueUser = new User("Yukius101", "newGoodPassword");
 
@@ -40,7 +40,7 @@ class SpringbootApplicationTests {
 	 * Добавить Нового Пользователя*/
 	@Test
 	void aSignUpPositiveTest(){
-		assertEquals(trueUser, userController.signUpUser(trueUser));
+		Assertions.assertEquals(trueUser, userController.signUpUser(trueUser));
 	}
 	/**1Negative SignUp
 	 * <br>
@@ -50,14 +50,14 @@ class SpringbootApplicationTests {
 
 		DataIntegrityViolationException thrown = assertThrows(
 				DataIntegrityViolationException.class, () -> userController.signUpUser(trueUser));
-		assertTrue(thrown.getMessage().contains("нарушает ограничение уникальности"));
+		Assertions.assertTrue(thrown.getMessage().contains("нарушает ограничение уникальности"));
 	}
 	/**Get All UsersLogins
 	 * <br>
 	 * Shouldn't be empty*/
 	@Test
 	void cGetAllUsersTest(){
-        assertFalse(userController.getAllUsers().isEmpty());
+        Assertions.assertFalse(userController.getAllUsers().isEmpty());
 	}
 	/**2Positive LogIn
 	 * <br>
@@ -65,7 +65,7 @@ class SpringbootApplicationTests {
 	@Test
 	void dLogIntoPositiveTest(){
 
-		assertEquals(trueUser.toString(), userController.logInto(trueUser).toString());
+		Assertions.assertEquals(trueUser.toString(), userController.logInto(trueUser).toString());
 	}
 	/**2Negative LogIn
 	 * <br>
@@ -74,7 +74,6 @@ class SpringbootApplicationTests {
 	void eLogIntoNegativeTest(){
 		EntityNotFoundException thrown = assertThrows(
 				EntityNotFoundException.class, () -> userController.logInto(wrongUser));
-		assertTrue(thrown.getMessage().equals("Please enter a correct login and password"));
 	}
 	/**3Positive Update
 	 * <br>
@@ -82,7 +81,7 @@ class SpringbootApplicationTests {
 	 * */
 	@Test
 	void fUpdatePositiveTest(){
-		assertEquals(newTrueUser.toString(), userController.changePassword(forChangingPass).toString());
+		Assertions.assertEquals(newTrueUser.toString(), userController.changePassword(forChangingPass).toString());
 	}
 	/**3Negative Update
 	 * <br>
@@ -92,26 +91,23 @@ class SpringbootApplicationTests {
 	void gUpdateNegativeTest(){
 		EntityNotFoundException thrown = assertThrows(
 				EntityNotFoundException.class, () -> userController.changePassword(forChangingPass));
-		assertTrue(thrown.getMessage().equals("Please enter a correct login and previous password"));
 	}
 	/**Get All UsersLogins*/
 	@Test
 	void hGetAllUsersAfterUpdate(){
-		assertFalse(userController.getAllUsers().isEmpty());
+		Assertions.assertFalse(userController.getAllUsers().isEmpty());
 	}
 
 	/** Delete*/
 	@Test
 	void iDeleteTest(){
-		assertTrue(userController.deleteUser(new User(1l,"Yukius101", "newGoodPassword")).contains("No Longer"));
-
+		Assertions.assertTrue(userController.deleteUser(new User(1L,"Yukius101", "newGoodPassword")).contains("No Longer"));
 
 	}
 	@Test
 	void jNegativeDeleteTest(){
 		EntityNotFoundException thrown = assertThrows(
-				EntityNotFoundException.class, () -> userController.deleteUser(new User(1l,"Yukius101", "newGoodPassword")));
-		assertTrue(thrown.getMessage().equals("Please enter a correct login and password"));
+				EntityNotFoundException.class, () -> userController.deleteUser(new User(1L,"Yukius101", "newGoodPassword")));
 
 	}
 
